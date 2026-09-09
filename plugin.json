@@ -1,0 +1,28 @@
+{
+  "tesserae_compat": "1.x",
+  "name": "OpenRouter Usage",
+  "version": "1.0.0",
+  "kind": "widget",
+  "description": "OpenRouter credit balance, spending, requests and token usage.",
+  "icon": "ph-chart-line-up",
+  "supports": {
+    "sizes": ["xs", "sm", "md", "lg"]
+  },
+  "settings": [
+    {
+      "name": "api_key",
+      "type": "string",
+      "label": "OpenRouter Management Key",
+      "secret": true,
+      "help": "Management key used server-side for the credits and activity APIs."
+    }
+  ],
+  "render": {
+    "dither": "none",
+    "needs_network": true
+  },
+  "requires": [
+    "network:openrouter.ai",
+    "settings:plugin"
+  ]
+}

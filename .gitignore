@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+data/
+settings.json
+*.tar.gz
+*.sha256
