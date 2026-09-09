@@ -94,7 +94,7 @@ Available balance is calculated as:
 total credits - total usage
 ```
 
-The activity endpoint reports the previous 30 completed UTC days. Consequently, the token and daily-spending sections are not real-time and may not include the current UTC day. Credit balance and total usage are current when OpenRouter responds.
+The activity endpoint reports the previous 30 completed UTC days. Consequently, the token and daily-spending sections are not real-time and may not include the current UTC day. The seven-day chart covers the seven most recent completed UTC days, with days that had no traffic shown as zero. Credit balance and total usage are current when OpenRouter responds.
 
 ## Privacy and security
 
@@ -112,7 +112,7 @@ An OpenRouter management key has administrative privileges. Protect the Tesserae
 
 ## Caching and failures
 
-Successful results are cached for ten minutes in Tesserae's plugin data directory. When OpenRouter is temporarily unavailable, the widget uses the last successful cached result and marks the display as `CACHED`. If no cache exists, the widget displays a friendly error rather than preventing the dashboard from rendering.
+Successful results are cached for ten minutes in Tesserae's plugin data directory, keyed on the configured management key so changing keys never shows another account's figures. The composer's fresh probe bypasses the cache. When OpenRouter is temporarily unavailable, the widget uses the last successful cached result and marks the display as `CACHED`. If no cache exists, the widget displays a friendly error rather than preventing the dashboard from rendering.
 
 ## Repository layout
 
@@ -124,9 +124,7 @@ tesserae-openrouter-usage/
 ├── client.js
 ├── server.py
 ├── README.md
-├── LICENSE
-└── tests/
-    └── test_smoke.py
+└── LICENSE
 ```
 
 Do not commit Tesserae's `data/` directory, `settings.json`, cache files, `.env` files, or API keys.

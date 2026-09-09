@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import time
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -51,11 +53,7 @@ def fetch(
 ) -> dict[str, Any]:
     del options
 
-    api_key = str(
-        settings.get("api_key")
-        or settings.get("api_key_secret")
-        or ""
-    ).strip()
+    api_key = str(settings.get("api_key") or "").strip()
 
     if not api_key:
         return {
@@ -64,11 +62,15 @@ def fetch(
 
     data_dir = Path(ctx["data_dir"])
     data_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = data_dir / "openrouter_usage.json"
+    # Key the cache on the credential so rotating to a different account's
+    # key never serves the previous account's numbers.
+    key_digest = hashlib.sha256(api_key.encode("utf-8")).hexdigest()[:12]
+    cache_path = data_dir / f"openrouter_usage-{key_digest}.json"
 
-    cached = _read_cache(cache_path)
-    if cached is not None:
-        return cached
+    if not ctx.get("fresh"):
+        cached = _read_cache(cache_path)
+        if cached is not None:
+            return cached
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -145,8 +147,19 @@ def fetch(
         model_row["requests"] += requests
         model_row["tokens"] += prompt + completion
 
+    # The activity endpoint only lists days that had traffic. Zero-fill the
+    # window so the chart covers seven consecutive completed UTC days rather
+    # than the last seven days with activity.
+    yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
+    anchor = max([yesterday, *by_day]) if by_day else yesterday
+    anchor_date = datetime.strptime(anchor, "%Y-%m-%d")
+    window = [
+        (anchor_date - timedelta(days=offset)).strftime("%Y-%m-%d")
+        for offset in range(6, -1, -1)
+    ]
+
     daily = []
-    for date in sorted(by_day)[-7:]:
+    for date in window:
         day = by_day[date]
         daily.append(
             {
@@ -159,7 +172,8 @@ def fetch(
             }
         )
 
-    latest = daily[-1] if daily else {
+    active_days = [day for day in daily if day["requests"] or day["spend"]]
+    latest = active_days[-1] if active_days else {
         "date": "",
         "spend": 0,
         "requests": 0,

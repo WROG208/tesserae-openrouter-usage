@@ -1,3 +1,9 @@
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
 function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
@@ -17,7 +23,7 @@ export default function render(shadow, ctx) {
       <style>
         .error { padding: 1rem; font: 700 1rem sans-serif; }
       </style>
-      <div class="error">⚠ ${d.error}</div>
+      <div class="error">⚠ ${esc(d.error)}</div>
     `;
     return;
   }
@@ -36,7 +42,7 @@ export default function render(shadow, ctx) {
         <div class="bar-space">
           <div class="bar" style="height:${height}%"></div>
         </div>
-        <div class="bar-label">${label}</div>
+        <div class="bar-label">${esc(label)}</div>
       </div>
     `;
   }).join("");
@@ -192,7 +198,7 @@ export default function render(shadow, ctx) {
         <div class="metric">
           <div class="label">Latest day</div>
           <div class="metric-value">${money(latest.spend)}</div>
-          <div class="label">${latest.date || "No data"}</div>
+          <div class="label">${esc(latest.date || "No data")}</div>
         </div>
 
         <div class="metric">
@@ -217,7 +223,7 @@ export default function render(shadow, ctx) {
       <div class="label">Seven-day spend</div>
       <div class="chart">${bars}</div>
 
-      <div class="model">TOP MODEL: ${d.top_model || "No activity"}</div>
+      <div class="model">TOP MODEL: ${esc(d.top_model || "No activity")}</div>
     </div>
   `;
 }
