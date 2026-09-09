@@ -1,7 +1,7 @@
 {
   "tesserae_compat": "1.x",
   "name": "OpenRouter Usage",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "kind": "widget",
   "description": "OpenRouter credit balance, spending, requests and token usage.",
   "icon": "ph-chart-line-up",
